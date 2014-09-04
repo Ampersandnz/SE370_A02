@@ -128,15 +128,20 @@ class FSFile:
     def __init__(self, name, parent):
         self.name = name
         self.parent = parent
-        real_name = name
-        while parent.get_name() is not '-':
-            real_name = parent.get_name() + '-' + real_name
-            parent = parent.get_parent()
+        real_name = self.get_full_name()
 
         self.the_file = open(real_name, 'w+')
 
     def get_name(self):
         return self.name
+
+    def get_full_name(self):
+        parent = self.parent
+        full_name = self.name
+        while parent.get_name() is not '-':
+            full_name = parent.get_name() + '-' + full_name
+            parent = parent.get_parent()
+        return full_name
 
     def set_name(self, new_name):
         if new_name.contains('-'):
@@ -156,8 +161,7 @@ class FSFile:
             self.parent = new_parent
 
     def delete(self):
-        #TODO: Delete the real file representing this file
-        pass
+        os.remove(self.get_full_name())
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -261,6 +265,9 @@ def fs_create(command_with_args):
     if command_with_args[-1][-1] == '-':
         print('Filenames cannot end in a \"-\" (Cannot create directories)')
         return
+    elif command_with_args[1][0] != '-':
+        print('Filenames must begin with a \"-\" (Top-level parent must be the root directory)')
+        return
 
     if len(command_with_args) > 1:
         if command_with_args[1][0] == '-':
@@ -309,11 +316,14 @@ def fs_cat(command_with_args):
 
 # Delete the named file.
 def fs_delete(command_with_args):
-    if len(command_with_args == 1):
+    if len(command_with_args) == 1:
         print('No file specified for deletion')
     else:
+        print("Deleting file: " + command_with_args[1])
         file_to_delete = fs_get_file(command_with_args[1])
+        print("Found file: " + command_with_args[1])
         file_to_delete.delete()
+        print("File: " + command_with_args[1] + " deleted.")
 
 
 # Delete the named directory, plus all subdirectories and contained files.
