@@ -134,6 +134,7 @@ class FSFile:
         while parent.get_name() is not '-':
             full_name = parent.get_name() + '-' + full_name
             parent = parent.get_parent()
+        full_name = '-' + full_name
         return full_name
 
     def set_name(self, new_name):
@@ -350,6 +351,8 @@ def fs_get_file(path):
         start_dir = current_dir
 
     split_path = path.split('-')
+    # Remove first element as it is null.
+    split_path.pop(0)
     search_dir = start_dir
     print("Start directory is: " + start_dir.get_name())
     while len(split_path) is not 1:
