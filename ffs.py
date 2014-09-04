@@ -8,6 +8,7 @@
 # Assignment 1 code.
 
 import shlex
+import os
 
 
 class FSDirectory:
@@ -76,9 +77,9 @@ class FSDirectory:
         else:
             return False
 
-    def add_file(self, file):
-        if file is FSFile:
-            self.files.append(file)
+    def add_file(self, new_file):
+        if new_file is FSFile:
+            self.files.append(new_file)
             return True
         else:
             return False
@@ -205,14 +206,19 @@ def fs_cd(command_with_args):
     return
 
 
-# List the contents of the current working directory.
+# List the contents of the named directory.
 def fs_ls(command_with_args):
+    #If no argument, use current working directory
     pass
 
 
-# List verbosely the contents of the current working directory.
+# List verbosely the contents of the real assignment directory.
 def fs_rls(command_with_args):
-    pass
+    child_pid = os.fork()
+    if child_pid == 0:
+        os.execvp("ls", ["ls", "-l"])
+    else:
+        os.wait()
 
 
 # Print the "tree" structure of the file system from the current working directory downwards.
@@ -260,7 +266,7 @@ fileSystemCommands = {
     fileSystemCommandList[0]: fs_pwd,
     fileSystemCommandList[1]: fs_cd,  # TODO: Incomplete
     #fileSystemCommandList[2]: fs_ls,  # TODO: Not started
-    #fileSystemCommandList[3]: fs_rls,  # TODO: Not started
+    fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     #fileSystemCommandList[5]: fs_clear,  # TODO: Not started
     #fileSystemCommandList[6]: fs_create,  # TODO: Not started
