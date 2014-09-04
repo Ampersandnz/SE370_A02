@@ -112,6 +112,7 @@ class FSDirectory:
             self.files.remove(f)
 
     def delete(self):
+        # TODO: Find out why this is only deleting one child (probably the first added)
         self.remove_all_children()
         self.remove_all_files()
         print('Directory ' + self.get_name() + ' deleted.')
@@ -405,10 +406,10 @@ fileSystemCommands = {
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     fileSystemCommandList[5]: fs_clear,
-    fileSystemCommandList[6]: fs_create,
+    fileSystemCommandList[6]: fs_create,  # TODO: Incomplete
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
-    fileSystemCommandList[9]: fs_delete,  # TODO: Incomplete
+    fileSystemCommandList[9]: fs_delete,
     fileSystemCommandList[10]: fs_dd,  # TODO: Incomplete
     fileSystemCommandList[11]: fs_quit,
     fileSystemCommandList[12]: fs_quit
