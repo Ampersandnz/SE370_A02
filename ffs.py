@@ -36,6 +36,10 @@ class FSDirectory:
     def set_parent(self, new_parent):
         if self.is_root:
             print('Cannot set the parent of root!')
+        elif new_parent is None:
+            print('Directories cannot have null parents!')
+        elif new_parent is not FSDirectory:
+            print('Directories must have parents of type FSDirectory!')
         else:
             self.parent = new_parent
 
@@ -95,6 +99,34 @@ class FSDirectory:
         print('File not found: ' + file_name)
         return False
 
+
+class FSFile:
+    def __init__(self, name, parent):
+        self.name = name
+        self.parent = parent
+        #TODO: Create file with correct name
+        #TODO: Save reference to that file in the object
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, new_name):
+        if new_name.contains('-'):
+            print ('File names cannot contain \"-\"!')
+        else:
+            self.name = new_name
+
+    def get_parent(self):
+        return self.parent
+
+    def set_parent(self, new_parent):
+        if new_parent is None:
+            print('Files cannot have null parents!')
+        elif new_parent is not FSDirectory:
+            print('Files must have parents of type FSDirectory!')
+        else:
+            self.parent = new_parent
+
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
 
@@ -148,7 +180,7 @@ def fs_pwd(arguments):
 # Change the current working directory.
 def fs_cd(command_with_args):
     if len(command_with_args) == 1:
-        new_path = home_dir
+        new_dir = home_dir
 
     # elif command_with_args[1].startswith('..'):
     #     pass
@@ -166,11 +198,10 @@ def fs_cd(command_with_args):
     # else:
     #     new_path = os.getcwd() + '/' + arguments[1]
 
-    if fs_is_dir(new_path):
-        global current_dir
-        current_dir = new_path
-    else:
-        print('ffs: cd: ' + command_with_args[1] + ': No such file or directory')
+    global current_dir
+    current_dir = new_dir
+
+    #print('ffs: cd: ' + command_with_args[1] + ': No such file or directory')
     return
 
 
@@ -224,23 +255,19 @@ def fs_quit(command_with_args):
     exit()
 
 
-# Parses a path to determine if it points to a valid directory in the system or not.
-def fs_is_dir(path):
-    return True
-
 # Map the inputs to the function blocks.
 fileSystemCommands = {
     fileSystemCommandList[0]: fs_pwd,
-    fileSystemCommandList[1]: fs_cd,
-    #fileSystemCommandList[2]: fs_ls,
-    #fileSystemCommandList[3]: fs_rls,
-    #fileSystemCommandList[4]: fs_tree,
-    #fileSystemCommandList[5]: fs_clear,
-    #fileSystemCommandList[6]: fs_create,
-    #fileSystemCommandList[7]: fs_add,
-    #fileSystemCommandList[8]: fs_cat,
-    #fileSystemCommandList[9]: fs_delete,
-    #fileSystemCommandList[10]: fs_dd,
+    fileSystemCommandList[1]: fs_cd,  # TODO: Incomplete
+    #fileSystemCommandList[2]: fs_ls,  # TODO: Not started
+    #fileSystemCommandList[3]: fs_rls,  # TODO: Not started
+    #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
+    #fileSystemCommandList[5]: fs_clear,  # TODO: Not started
+    #fileSystemCommandList[6]: fs_create,  # TODO: Not started
+    #fileSystemCommandList[7]: fs_add,  # TODO: Not started
+    #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
+    #fileSystemCommandList[9]: fs_delete,  # TODO: Not started
+    #fileSystemCommandList[10]: fs_dd,  # TODO: Not started
     fileSystemCommandList[11]: fs_quit,
     fileSystemCommandList[12]: fs_quit
 }
