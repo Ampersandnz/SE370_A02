@@ -100,6 +100,20 @@ class FSDirectory:
         print('File not found: ' + file_name)
         return False
 
+    def remove_all_children(self):
+        for c in self.children:
+            c.delete()
+            self.children.remove(c)
+
+    def remove_all_files(self):
+        for f in self.files:
+            f.delete()
+            self.files.remove(f)
+
+    def delete(self):
+        self.remove_all_children()
+        self.remove_all_files()
+
 
 class FSFile:
     def __init__(self, name, parent):
@@ -127,6 +141,10 @@ class FSFile:
             print('Files must have parents of type FSDirectory!')
         else:
             self.parent = new_parent
+
+    def delete(self):
+        #TODO: Delete the real file representing this file
+        pass
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -248,11 +266,33 @@ def fs_cat(command_with_args):
 
 # Delete the named file.
 def fs_delete(command_with_args):
-    pass
+    if len(command_with_args == 1):
+        print('No file specified for deletion')
+    else:
+        file_to_delete = fs_get_file(command_with_args[1])
+        file_to_delete.delete()
 
 
 # Delete the named directory, plus all subdirectories and contained files.
 def fs_dd(command_with_args):
+    if len(command_with_args == 1):
+        print('No directory specified for deletion')
+    else:
+        dir_to_delete = fs_get_directory(command_with_args[1])
+        dir_to_delete.delete()
+    #TODO: Ensure that the current working directory is changed when it is one of the
+    # (sub)directories that are being deleted.
+
+
+# This function returns the file described by the given absolute or relative path.
+def fs_get_file(path):
+    #TODO: Write this.
+    pass
+
+
+# This function returns the directory described by the given absolute or relative path.
+def fs_get_directory(path):
+    #TODO: Write this.
     pass
 
 
@@ -272,8 +312,8 @@ fileSystemCommands = {
     #fileSystemCommandList[6]: fs_create,  # TODO: Not started
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
-    #fileSystemCommandList[9]: fs_delete,  # TODO: Not started
-    #fileSystemCommandList[10]: fs_dd,  # TODO: Not started
+    fileSystemCommandList[9]: fs_delete,  # TODO: Incomplete
+    fileSystemCommandList[10]: fs_dd,  # TODO: Incomplete
     fileSystemCommandList[11]: fs_quit,
     fileSystemCommandList[12]: fs_quit
 }
