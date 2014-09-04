@@ -74,18 +74,10 @@ class FSDirectory:
         return False
 
     def add_child(self, child):
-        if child is FSDirectory:
-            self.children.append(child)
-            return True
-        else:
-            return False
+        self.children.append(child)
 
     def add_file(self, new_file):
-        if new_file is FSFile:
-            self.files.append(new_file)
-            return True
-        else:
-            return False
+        self.files.append(new_file)
 
     def remove_child(self, child_name):
         for c in self.children:
@@ -122,6 +114,7 @@ class FSDirectory:
     def delete(self):
         self.remove_all_children()
         self.remove_all_files()
+        print('Directory ' + self.get_name() + ' deleted.')
 
 
 class FSFile:
@@ -162,6 +155,7 @@ class FSFile:
 
     def delete(self):
         os.remove(self.get_full_name())
+        print('File ' + self.get_name() + ' deleted.')
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -255,9 +249,10 @@ def fs_tree(command_with_args):
 
 # Remove all files in the file system.
 def fs_clear(command_with_args):
+    print('Clear called')
     for FSDir in home_dir.get_all_children():
+        print('Deleting top-level directory: ' + FSDir.get_name())
         FSDir.delete()
-    pass
 
 
 # Create a file with the specified name.
@@ -278,6 +273,8 @@ def fs_create(command_with_args):
             start_dir = current_dir
 
         split_path = command_with_args[1].split('-')
+        # Remove first element, as it is null (due to how split() handles the split character being the first.
+        split_path.pop(0)
 
         if len(command_with_args) > 2:
             for element in command_with_args[2:]:
@@ -319,7 +316,6 @@ def fs_delete(command_with_args):
     if len(command_with_args) == 1:
         print('No file specified for deletion')
     else:
-        print("Deleting file: " + command_with_args[1])
         file_to_delete = fs_get_file(command_with_args[1])
         print("Found file: " + command_with_args[1])
         file_to_delete.delete()
@@ -346,19 +342,25 @@ def fs_quit(command_with_args):
 def fs_get_file(path):
     if path[0] == '-':
         #Absolute path
+        print("Absolute path")
         start_dir = home_dir
     else:
         #Relative path
+        print("Relative path")
         start_dir = current_dir
 
     split_path = path.split('-')
     search_dir = start_dir
+    print("Start directory is: " + start_dir.get_name())
     while len(split_path) is not 1:
+        print("Search directory is: " + search_dir.get_name())
         if search_dir.contains_child(split_path[0]):
+            print("Search directory contains the expected child")
             search_dir = search_dir.get_child(split_path[0])
             split_path.pop(0)
 
     if search_dir.contains_file(split_path[0]):
+        print("Final directory contains the expected file")
         return search_dir.get_file(split_path[0])
     else:
         print('Unable to find file ' + path)
