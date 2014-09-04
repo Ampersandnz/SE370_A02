@@ -251,6 +251,8 @@ def fs_tree(command_with_args):
 
 # Remove all files in the file system.
 def fs_clear(command_with_args):
+    for FSDir in home_dir.get_all_children():
+        FSDir.delete()
     pass
 
 
@@ -387,7 +389,7 @@ fileSystemCommands = {
     #fileSystemCommandList[2]: fs_ls,  # TODO: Not started
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
-    #fileSystemCommandList[5]: fs_clear,  # TODO: Not started
+    fileSystemCommandList[5]: fs_clear,
     fileSystemCommandList[6]: fs_create,
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
