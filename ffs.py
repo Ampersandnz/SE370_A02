@@ -284,22 +284,31 @@ def fs_dd(command_with_args):
     # (sub)directories that are being deleted.
 
 
+# Exit this program.
+def fs_quit(command_with_args):
+    exit()
+
+
 # This function returns the file described by the given absolute or relative path.
 def fs_get_file(path):
     #TODO: Write this.
-    pass
+    if path[0] == '-':
+        #Absolute path
+        pass
+    else:
+        #Relative path
+        pass
 
 
 # This function returns the directory described by the given absolute or relative path.
 def fs_get_directory(path):
     #TODO: Write this.
-    pass
-
-
-# Exit this program.
-def fs_quit(command_with_args):
-    exit()
-
+    if path[0] == '-':
+        #Absolute path
+        pass
+    else:
+        #Relative path
+        pass
 
 # Map the inputs to the function blocks.
 fileSystemCommands = {
