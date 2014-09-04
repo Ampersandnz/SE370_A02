@@ -10,6 +10,7 @@
 import shlex
 import os
 
+
 # Represents a directory
 class FSDirectory:
     def __init__(self, name, parent):
@@ -127,8 +128,12 @@ class FSFile:
     def __init__(self, name, parent):
         self.name = name
         self.parent = parent
-        #TODO: Create file with correct name
-        #TODO: Save reference to that file in the object
+        real_name = name
+        while parent.get_name() is not '-':
+            real_name = parent.get_name() + '-' + real_name
+            parent = parent.get_parent()
+
+        self.the_file = open(real_name, 'w+')
 
     def get_name(self):
         return self.name
@@ -251,7 +256,36 @@ def fs_clear(command_with_args):
 
 # Create a file with the specified name.
 def fs_create(command_with_args):
-    pass
+
+    if len(command_with_args) > 1:
+        if command_with_args[1][0] == '-':
+            #Absolute path
+            start_dir = home_dir
+        else:
+            #Relative path
+            start_dir = current_dir
+
+        split_path = []
+        split_path = command_with_args[1].split('-')
+        #TODO: Handle spaces in filenames - split all arguments, not just first,
+        # and then combine them back into one list
+        search_dir = start_dir
+    else:
+        print('Please provide the name of a file to be created')
+        return
+
+    while len(split_path) is not 1:
+        if not search_dir.contains_child(split_path[0]):
+            new_dir = FSDirectory(split_path[0], search_dir)
+            search_dir.add_child(new_dir)
+            search_dir = new_dir
+        else:
+            search_dir = search_dir.get_child(split_path[0])
+
+        split_path.pop(0)
+
+    new_file = FSFile(split_path[0], search_dir)
+    search_dir.add_file(new_file)
 
 
 # Appends text to the named file.
@@ -347,7 +381,7 @@ fileSystemCommands = {
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     #fileSystemCommandList[5]: fs_clear,  # TODO: Not started
-    #fileSystemCommandList[6]: fs_create,  # TODO: Not started
+    fileSystemCommandList[6]: fs_create,  # TODO: Incomplete
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
     fileSystemCommandList[9]: fs_delete,  # TODO: Incomplete
