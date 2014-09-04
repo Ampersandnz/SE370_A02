@@ -10,7 +10,7 @@
 import shlex
 import os
 
-
+# Represents a directory
 class FSDirectory:
     def __init__(self, name, parent):
         self.name = name
@@ -18,6 +18,9 @@ class FSDirectory:
         self.children = []
         self.files = []
         self.is_root = name is '-'
+
+        if self.is_root:
+            self.parent = self
 
     def get_name(self):
         return self.name
@@ -31,8 +34,7 @@ class FSDirectory:
             self.name = new_name
 
     def get_parent(self):
-        if not self.is_root:
-            return self.parent
+        return self.parent
 
     def set_parent(self, new_parent):
         if self.is_root:
@@ -100,6 +102,12 @@ class FSDirectory:
         print('File not found: ' + file_name)
         return False
 
+    def get_all_children(self):
+        return self.children
+
+    def get_all_files(self):
+        return self.files
+
     def remove_all_children(self):
         for c in self.children:
             c.delete()
@@ -149,21 +157,24 @@ class FSFile:
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
 
-home_dir = "-"
+home_dir = FSDirectory('-', None)
 current_dir = home_dir
 
 
 # Accepts user input, and runs the commands when they are entered.
 def main():
+    directory = os.path.dirname(os.getcwd() + '/A2dir/')
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    os.chdir(directory)
+
     while 1:
         try:
             user_input = input('ffs> ')
             if user_input.strip() != '':
-                try:
-                    do_command(user_input)
-                except:
-                    print("SOME KIND OF ERROR OCCURRED")
-                    exit()
+                do_command(user_input)
         except KeyboardInterrupt:
             print('')
         except EOFError:
@@ -198,29 +209,18 @@ def fs_pwd(arguments):
 
 # Change the current working directory.
 def fs_cd(command_with_args):
+    global current_dir
     if len(command_with_args) == 1:
         new_dir = home_dir
+    elif command_with_args[1] == '..':
+        new_dir = current_dir.get_parent()
+    else:
+        new_dir = fs_get_directory(command_with_args[1])
 
-    # elif command_with_args[1].startswith('..'):
-    #     pass
-
-    # elif arguments[1].startswith('.'):
-    #     add_to_path = (arguments[1])[1:]
-    #     new_path = os.getcwd() + add_to_path
-
-    # elif arguments[1].startswith('/'):
-    #     new_path = arguments[1]
-
-    # elif command_with_args[1].startswith('-'):
-    #     new_path = os.path.expanduser(arguments[1])
-
-    # else:
-    #     new_path = os.getcwd() + '/' + arguments[1]
-
-    global current_dir
-    current_dir = new_dir
-
-    #print('ffs: cd: ' + command_with_args[1] + ': No such file or directory')
+    if new_dir is None:
+        print('ffs: cd: ' + command_with_args[1] + ': No such file or directory')
+    else:
+        current_dir = new_dir
     return
 
 
@@ -291,29 +291,58 @@ def fs_quit(command_with_args):
 
 # This function returns the file described by the given absolute or relative path.
 def fs_get_file(path):
-    #TODO: Write this.
     if path[0] == '-':
         #Absolute path
-        pass
+        start_dir = home_dir
     else:
         #Relative path
-        pass
+        start_dir = current_dir
+
+    split_path = path.split('-')
+    search_dir = start_dir
+    while len(split_path) is not 1:
+        if search_dir.contains_child(split_path[0]):
+            search_dir = search_dir.get_child(split_path[0])
+            split_path.pop(0)
+
+    if search_dir.contains_file(split_path[0]):
+        return search_dir.get_file(split_path[0])
+    else:
+        print('Unable to find file ' + path)
+        return None
 
 
 # This function returns the directory described by the given absolute or relative path.
 def fs_get_directory(path):
-    #TODO: Write this.
+    print(path)
+    if path[-1] == '-':
+        path = path[:-1]
+        print("removed trailing -")
+        print(path)
     if path[0] == '-':
         #Absolute path
-        pass
+        start_dir = home_dir
     else:
         #Relative path
-        pass
+        start_dir = current_dir
+
+    split_path = path.split('-')
+    search_dir = start_dir
+    while len(split_path) is not 1:
+        if search_dir.contains_child(split_path[0]):
+            search_dir = search_dir.get_child(split_path[0])
+            split_path.pop(0)
+
+    if search_dir.contains_child(split_path[0]):
+        return search_dir.get_child(split_path[0])
+    else:
+        print('Unable to find directory ' + path)
+        return None
 
 # Map the inputs to the function blocks.
 fileSystemCommands = {
     fileSystemCommandList[0]: fs_pwd,
-    fileSystemCommandList[1]: fs_cd,  # TODO: Incomplete
+    fileSystemCommandList[1]: fs_cd,
     #fileSystemCommandList[2]: fs_ls,  # TODO: Not started
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
