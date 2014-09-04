@@ -256,6 +256,9 @@ def fs_clear(command_with_args):
 
 # Create a file with the specified name.
 def fs_create(command_with_args):
+    if command_with_args[-1][-1] == '-':
+        print('Filenames cannot end in a \"-\" (Cannot create directories)')
+        return
 
     if len(command_with_args) > 1:
         if command_with_args[1][0] == '-':
@@ -265,10 +268,14 @@ def fs_create(command_with_args):
             #Relative path
             start_dir = current_dir
 
-        split_path = []
         split_path = command_with_args[1].split('-')
-        #TODO: Handle spaces in filenames - split all arguments, not just first,
-        # and then combine them back into one list
+
+        if len(command_with_args) > 2:
+            for element in command_with_args[2:]:
+                next_split_path = element.split('-')
+                split_path[-1] = split_path[-1] + ' ' + next_split_path[0]
+                split_path += next_split_path[1:]
+
         search_dir = start_dir
     else:
         print('Please provide the name of a file to be created')
@@ -381,7 +388,7 @@ fileSystemCommands = {
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     #fileSystemCommandList[5]: fs_clear,  # TODO: Not started
-    fileSystemCommandList[6]: fs_create,  # TODO: Incomplete
+    fileSystemCommandList[6]: fs_create,
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
     fileSystemCommandList[9]: fs_delete,  # TODO: Incomplete
