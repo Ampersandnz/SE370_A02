@@ -9,6 +9,7 @@
 
 import shlex
 import os
+import sys
 
 
 # Represents a directory
@@ -133,6 +134,22 @@ class FSDirectory:
         for c in self.children:
             c.print_name()
 
+    def print_tree(self):
+        name_to_print = self.get_full_name()
+
+        if not self.is_root:
+            name_to_print += '-'
+        num_of_indents = name_to_print.count('-') - 1
+
+        print('    ' * num_of_indents + name_to_print)
+        print('    ' * num_of_indents + '=' * len(name_to_print))
+
+        for c in self.children:
+            c.print_tree()
+
+        for f in self.files:
+            f.print_tree()
+
 
 class FSFile:
     def __init__(self, name, parent):
@@ -179,22 +196,31 @@ class FSFile:
 
     def add_text(self, text):
         with open(self.get_full_name(), 'w+') as file_name:
-            print('Adding text \"' + text + '\" to file: ' + self.get_full_name())
             file_name.write(text)
 
     def print_contents(self):
         with open(self.get_full_name(), 'r') as file_name:
             print(file_name.read())
 
+    def print_tree(self):
+        num_of_indents = self.get_full_name().count('-') - 1
+        print('    ' * num_of_indents + self.get_name())
+
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
 
 home_dir = FSDirectory('-', None)
 current_dir = home_dir
+input_coming_from_file = False
 
 
 # Accepts user input, and runs the commands when they are entered.
 def main():
+    if not sys.stdin.isatty():
+        print("Input is coming from a file!")
+        global input_coming_from_file
+        input_coming_from_file = True
+
     directory = os.path.dirname(os.getcwd() + '/A2dir/')
 
     if not os.path.exists(directory):
@@ -204,7 +230,14 @@ def main():
 
     while 1:
         try:
-            user_input = input('ffs> ')
+            if input_coming_from_file:
+                for line in sys.stdin:
+                    if line.strip() is not '':
+                        print ('ffs> ' + line)
+                        user_input = line
+                        do_command(user_input)
+            else:
+                user_input = input('ffs> ')
             if user_input.strip() != '':
                 do_command(user_input)
         except KeyboardInterrupt:
@@ -277,7 +310,12 @@ def fs_rls(command_with_args):
 
 # Print the "tree" structure of the file system from the current working directory downwards.
 def fs_tree(command_with_args):
-    pass
+    if len(command_with_args) is 1:
+        dir_to_tree = current_dir
+    else:
+        dir_to_tree = fs_get_directory(command_with_args[1])
+    if dir_to_tree is not None:
+        dir_to_tree.print_tree()
 
 
 # Remove all files in the file system.
@@ -409,19 +447,14 @@ def fs_get_file(path):
 
     search_dir = start_dir
 
-    print("Start directory is: " + start_dir.get_name())
     while len(split_path) > 1:
-        print("Search directory is: " + search_dir.get_name())
         if search_dir.contains_child(split_path[0]):
-            print("Search directory contains the expected child")
             search_dir = search_dir.get_child(split_path[0])
             split_path.pop(0)
         else:
-            print("Search directory does not contain the expected child: " + split_path[0])
             return None
 
     if search_dir.contains_file(split_path[0]):
-        print("Final directory contains the expected file")
         return search_dir.get_file(split_path[0])
     else:
         print('Unable to find file ' + split_path[0])
@@ -453,7 +486,6 @@ def fs_get_directory(path):
             search_dir = search_dir.get_child(split_path[0])
             split_path.pop(0)
         else:
-            print("Search directory does not contain the expected child: " + split_path[0])
             return None
 
     if search_dir.contains_child(split_path[0]):
@@ -468,7 +500,7 @@ fileSystemCommands = {
     fileSystemCommandList[1]: fs_cd,
     fileSystemCommandList[2]: fs_ls,
     fileSystemCommandList[3]: fs_rls,
-    #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
+    fileSystemCommandList[4]: fs_tree,
     fileSystemCommandList[5]: fs_clear,
     fileSystemCommandList[6]: fs_create,
     fileSystemCommandList[7]: fs_add,
