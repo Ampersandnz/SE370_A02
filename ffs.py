@@ -124,6 +124,15 @@ class FSDirectory:
         self.remove_all_children()
         self.parent.remove_child(self.get_name())
 
+    def print_name(self):
+        print('d: ' + self.get_name())
+
+    def ls(self):
+        for f in self.files:
+            f.print_name()
+        for c in self.children:
+            c.print_name()
+
 
 class FSFile:
     def __init__(self, name, parent):
@@ -165,6 +174,9 @@ class FSFile:
     def delete(self):
         os.remove(self.get_full_name())
         self.parent.remove_file(self.get_name())
+
+    def print_name(self):
+        print('f: ' + self.get_name())
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -238,8 +250,12 @@ def fs_cd(command_with_args):
 
 # List the contents of the named directory.
 def fs_ls(command_with_args):
-    #If no argument, use current working directory
-    pass
+    if len(command_with_args) is 1:
+        dir_to_list = current_dir
+    else:
+        dir_to_list = fs_get_directory(command_with_args[1])
+    if dir_to_list is not None:
+        dir_to_list.ls()
 
 
 # List verbosely the contents of the real assignment directory.
@@ -297,7 +313,6 @@ def fs_create(command_with_args):
     while len(split_path) is not 1:
         if not search_dir.contains_child(split_path[0]):
             new_dir = FSDirectory(split_path[0], search_dir)
-            search_dir.add_child(new_dir)
             search_dir = new_dir
         else:
             search_dir = search_dir.get_child(split_path[0])
@@ -422,7 +437,7 @@ def fs_get_directory(path):
 fileSystemCommands = {
     fileSystemCommandList[0]: fs_pwd,
     fileSystemCommandList[1]: fs_cd,
-    #fileSystemCommandList[2]: fs_ls,  # TODO: Not started
+    fileSystemCommandList[2]: fs_ls,
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     fileSystemCommandList[5]: fs_clear,
