@@ -115,17 +115,16 @@ class FSDirectory:
 
     def remove_all_children(self):
         for c in self.children:
-            self.remove_child(c.get_name())
             c.delete()
 
     def remove_all_files(self):
         for f in self.files:
-            self.remove_file(f.get_name())
             f.delete()
 
     def delete(self):
         self.remove_all_children()
         self.remove_all_files()
+        self.parent.remove_child(self.get_name())
 
 
 class FSFile:
@@ -166,6 +165,7 @@ class FSFile:
             self.parent = new_parent
 
     def delete(self):
+        self.parent.remove_file(self.get_name())
         os.remove(self.get_full_name())
 
 # Lists the commands that will be executed by this program.
@@ -332,14 +332,18 @@ def fs_delete(command_with_args):
 
 # Delete the named directory, plus all subdirectories and contained files.
 def fs_dd(command_with_args):
-    if len(command_with_args == 1):
+    if len(command_with_args) == 1:
         print('No directory specified for deletion')
     else:
         dir_to_delete = fs_get_directory(command_with_args[1])
         if dir_to_delete is not None:
+            # If the directory to be deleted is a parent of the current working directory,
+            # set cwd to be parent of deleted directory.
+            global current_dir
+            if current_dir.get_full_name().startswith(dir_to_delete.get_full_name()):
+                current_dir = dir_to_delete.get_parent()
+
             dir_to_delete.delete()
-    #TODO: Ensure that the current working directory is changed when it is one of the
-    # (sub)directories that are being deleted.
 
 
 # Exit this program.
