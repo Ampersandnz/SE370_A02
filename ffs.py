@@ -182,6 +182,10 @@ class FSFile:
             print('Adding text \"' + text + '\" to file: ' + self.get_full_name())
             file_name.write(text)
 
+    def print_contents(self):
+        with open(self.get_full_name(), 'r') as file_name:
+            print(file_name.read())
+
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
 
@@ -331,13 +335,15 @@ def fs_create(command_with_args):
 
 # Appends text to the named file.
 def fs_add(command_with_args):
-    if len(command_with_args) < 2:
+    if len(command_with_args) < 3:
         print('Please specify both the name of the file to modify and the text to append.')
         return
+
     file_to_modify = fs_get_file(command_with_args[1])
 
     if file_to_modify is not None:
         text_to_append = command_with_args[2]
+
         if len(command_with_args) > 3:
             for element in command_with_args[3:]:
                 text_to_append = text_to_append + ' ' + element
@@ -346,7 +352,14 @@ def fs_add(command_with_args):
 
 # Display the contents of the named file.
 def fs_cat(command_with_args):
-    pass
+    if len(command_with_args) < 2:
+        print('Please specify the name of the file to print.')
+        return
+
+    file_to_print = fs_get_file(command_with_args[1])
+
+    if file_to_print is not None:
+        file_to_print.print_contents()
 
 
 # Delete the named file.
@@ -459,7 +472,7 @@ fileSystemCommands = {
     fileSystemCommandList[5]: fs_clear,
     fileSystemCommandList[6]: fs_create,
     fileSystemCommandList[7]: fs_add,
-    #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
+    fileSystemCommandList[8]: fs_cat,
     fileSystemCommandList[9]: fs_delete,
     fileSystemCommandList[10]: fs_dd,
     fileSystemCommandList[11]: fs_quit,
