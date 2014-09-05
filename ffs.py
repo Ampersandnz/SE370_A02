@@ -20,8 +20,8 @@ class FSDirectory:
         self.files = []
         self.is_root = name is '-'
 
-        if self.is_root:
-            self.parent = self
+        if not self.is_root:
+            self.parent.add_child(self)
 
     def get_name(self):
         return self.name
@@ -103,16 +103,17 @@ class FSDirectory:
 
     def remove_all_children(self):
         for c in self.children:
+            print('Directory ' + self.get_name() + ' wants to remove child ' + c.get_name())
+            self.remove_child(c.get_name())
             c.delete()
-            self.children.remove(c)
 
     def remove_all_files(self):
         for f in self.files:
+            print('Directory ' + self.get_name() + ' wants to remove file ' + f.get_name())
+            self.remove_file(f.get_name())
             f.delete()
-            self.files.remove(f)
 
     def delete(self):
-        # TODO: Find out why this is only deleting one child (probably the first added)
         self.remove_all_children()
         self.remove_all_files()
         print('Directory ' + self.get_name() + ' deleted.')
@@ -251,10 +252,8 @@ def fs_tree(command_with_args):
 
 # Remove all files in the file system.
 def fs_clear(command_with_args):
-    print('Clear called')
-    for FSDir in home_dir.get_all_children():
-        print('Deleting top-level directory: ' + FSDir.get_name())
-        FSDir.delete()
+    home_dir.remove_all_children()
+    home_dir.remove_all_files()
 
 
 # Create a file with the specified name.
@@ -406,7 +405,7 @@ fileSystemCommands = {
     fileSystemCommandList[3]: fs_rls,
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     fileSystemCommandList[5]: fs_clear,
-    fileSystemCommandList[6]: fs_create,  # TODO: Incomplete
+    fileSystemCommandList[6]: fs_create,
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
     fileSystemCommandList[9]: fs_delete,
