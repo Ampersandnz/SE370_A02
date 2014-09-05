@@ -1,0 +1,15 @@
+# SoftEng 370 Assignment 2
+# "Tree" file system
+# Michael Lo
+# mlo450
+# 5530588
+
+1. 255 characters
+
+2. Easily understood by humans, simple to implement.
+Move - Don't ever need to actually move data from one place to another on the same disk, just rename the file.
+
+3. System very quickly grows to contain many files, which makes iterating over it to find a specific file slow. Also hinders human readability.
+Security - Modern systems restrict folders to specific groups of users. In a flat system, each file would need its own list of allowed user permissions.
+
+4. If files are sorted in a logical way (eg alphabetical) searching becomes much more efficient, but still slower than in a hierachal system.

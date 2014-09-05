@@ -57,7 +57,7 @@ target/
 .idea/
 
 # Test files
-*.txt
+test*.txt
 
 # Handout
 A2 handout.pdf
