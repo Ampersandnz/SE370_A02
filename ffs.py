@@ -216,17 +216,19 @@ input_coming_from_file = False
 
 # Accepts user input, and runs the commands when they are entered.
 def main():
-    if not sys.stdin.isatty():
-        print("Input is coming from a file!")
-        global input_coming_from_file
-        input_coming_from_file = True
-
     directory = os.path.dirname(os.getcwd() + '/A2dir/')
 
     if not os.path.exists(directory):
         os.makedirs(directory)
 
     os.chdir(directory)
+
+    fs_restore_state()
+
+    if not sys.stdin.isatty():
+        print("Input is coming from a file!")
+        global input_coming_from_file
+        input_coming_from_file = True
 
     while 1:
         try:
@@ -493,6 +495,15 @@ def fs_get_directory(path):
     else:
         print('Unable to find directory ' + split_path[0])
         return None
+
+
+# Searches the /A2dir/ directory for files and rebuilds the tree structure.
+def fs_restore_state():
+    previous_files = os.listdir(os.getcwd())
+
+    for filename in previous_files:
+        fs_create(['create', filename])
+
 
 # Map the inputs to the function blocks.
 fileSystemCommands = {
