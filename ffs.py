@@ -26,6 +26,18 @@ class FSDirectory:
     def get_name(self):
         return self.name
 
+    def get_full_name(self):
+        if self.is_root:
+            return '-'
+        else:
+            parent = self.parent
+            full_name = self.name
+            while parent.get_name() is not '-':
+                full_name = parent.get_name() + '-' + full_name
+                parent = parent.get_parent()
+            full_name = '-' + full_name
+            return full_name
+
     def set_name(self, new_name):
         if self.is_root:
             print ('Cannot rename root!')
@@ -64,14 +76,14 @@ class FSDirectory:
             if d.get_name() == child_name:
                 return d
         print('Directory not found: ' + child_name)
-        return False
+        return None
 
     def get_file(self, file_name):
         for f in self.files:
             if f.get_name() == file_name:
                 return f
         print('File not found: ' + file_name)
-        return False
+        return None
 
     def add_child(self, child):
         self.children.append(child)
@@ -103,20 +115,17 @@ class FSDirectory:
 
     def remove_all_children(self):
         for c in self.children:
-            print('Directory ' + self.get_name() + ' wants to remove child ' + c.get_name())
             self.remove_child(c.get_name())
             c.delete()
 
     def remove_all_files(self):
         for f in self.files:
-            print('Directory ' + self.get_name() + ' wants to remove file ' + f.get_name())
             self.remove_file(f.get_name())
             f.delete()
 
     def delete(self):
         self.remove_all_children()
         self.remove_all_files()
-        print('Directory ' + self.get_name() + ' deleted.')
 
 
 class FSFile:
@@ -158,7 +167,6 @@ class FSFile:
 
     def delete(self):
         os.remove(self.get_full_name())
-        print('File ' + self.get_name() + ' deleted.')
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -210,7 +218,7 @@ def parse_input(user_input):
 
 # Print the current working directory.
 def fs_pwd(arguments):
-    print(current_dir)
+    print(current_dir.get_full_name())
 
 
 # Change the current working directory.
@@ -318,9 +326,8 @@ def fs_delete(command_with_args):
         print('No file specified for deletion')
     else:
         file_to_delete = fs_get_file(command_with_args[1])
-        print("Found file: " + command_with_args[1])
-        file_to_delete.delete()
-        print("File: " + command_with_args[1] + " deleted.")
+        if file_to_delete is not None:
+            file_to_delete.delete()
 
 
 # Delete the named directory, plus all subdirectories and contained files.
@@ -329,7 +336,8 @@ def fs_dd(command_with_args):
         print('No directory specified for deletion')
     else:
         dir_to_delete = fs_get_directory(command_with_args[1])
-        dir_to_delete.delete()
+        if dir_to_delete is not None:
+            dir_to_delete.delete()
     #TODO: Ensure that the current working directory is changed when it is one of the
     # (sub)directories that are being deleted.
 
@@ -343,40 +351,42 @@ def fs_quit(command_with_args):
 def fs_get_file(path):
     if path[0] == '-':
         #Absolute path
-        print("Absolute path")
         start_dir = home_dir
     else:
         #Relative path
-        print("Relative path")
         start_dir = current_dir
 
     split_path = path.split('-')
-    # Remove first element as it is null.
-    split_path.pop(0)
+    if split_path[0] == '':
+        # Remove first element as it is empty.
+        split_path.pop(0)
+
     search_dir = start_dir
+
     print("Start directory is: " + start_dir.get_name())
-    while len(split_path) is not 1:
+    while len(split_path) > 1:
         print("Search directory is: " + search_dir.get_name())
         if search_dir.contains_child(split_path[0]):
             print("Search directory contains the expected child")
             search_dir = search_dir.get_child(split_path[0])
             split_path.pop(0)
+        else:
+            print("Search directory does not contain the expected child: " + split_path[0])
+            return None
 
     if search_dir.contains_file(split_path[0]):
         print("Final directory contains the expected file")
         return search_dir.get_file(split_path[0])
     else:
-        print('Unable to find file ' + path)
+        print('Unable to find file ' + split_path[0])
         return None
 
 
 # This function returns the directory described by the given absolute or relative path.
 def fs_get_directory(path):
-    print(path)
     if path[-1] == '-':
         path = path[:-1]
-        print("removed trailing -")
-        print(path)
+
     if path[0] == '-':
         #Absolute path
         start_dir = home_dir
@@ -385,16 +395,25 @@ def fs_get_directory(path):
         start_dir = current_dir
 
     split_path = path.split('-')
+
+    if split_path[0] == '':
+        # Remove first element as it is empty.
+        split_path.pop(0)
+
     search_dir = start_dir
+
     while len(split_path) is not 1:
         if search_dir.contains_child(split_path[0]):
             search_dir = search_dir.get_child(split_path[0])
             split_path.pop(0)
+        else:
+            print("Search directory does not contain the expected child: " + split_path[0])
+            return None
 
     if search_dir.contains_child(split_path[0]):
         return search_dir.get_child(split_path[0])
     else:
-        print('Unable to find directory ' + path)
+        print('Unable to find directory ' + split_path[0])
         return None
 
 # Map the inputs to the function blocks.
