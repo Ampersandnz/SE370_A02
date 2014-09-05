@@ -138,9 +138,7 @@ class FSFile:
     def __init__(self, name, parent):
         self.name = name
         self.parent = parent
-        real_name = self.get_full_name()
-
-        self.the_file = open(real_name, 'w+')
+        self.the_file = open(self.get_full_name(), 'w+')
 
     def get_name(self):
         return self.name
@@ -172,11 +170,17 @@ class FSFile:
             self.parent = new_parent
 
     def delete(self):
+        self.the_file.close()
         os.remove(self.get_full_name())
         self.parent.remove_file(self.get_name())
 
     def print_name(self):
         print('f: ' + self.get_name())
+
+    def add_text(self, text):
+        with open(self.get_full_name(), 'w+') as file_name:
+            print('Adding text \"' + text + '\" to file: ' + self.get_full_name())
+            file_name.write(text)
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -274,6 +278,8 @@ def fs_tree(command_with_args):
 
 # Remove all files in the file system.
 def fs_clear(command_with_args):
+    global current_dir
+    current_dir = home_dir
     home_dir.remove_all_children()
     home_dir.remove_all_files()
 
@@ -325,7 +331,17 @@ def fs_create(command_with_args):
 
 # Appends text to the named file.
 def fs_add(command_with_args):
-    pass
+    if len(command_with_args) < 2:
+        print('Please specify both the name of the file to modify and the text to append.')
+        return
+    file_to_modify = fs_get_file(command_with_args[1])
+
+    if file_to_modify is not None:
+        text_to_append = command_with_args[2]
+        if len(command_with_args) > 3:
+            for element in command_with_args[3:]:
+                text_to_append = text_to_append + ' ' + element
+        file_to_modify.add_text(text_to_append)
 
 
 # Display the contents of the named file.
@@ -442,7 +458,7 @@ fileSystemCommands = {
     #fileSystemCommandList[4]: fs_tree,  # TODO: Not started
     fileSystemCommandList[5]: fs_clear,
     fileSystemCommandList[6]: fs_create,
-    #fileSystemCommandList[7]: fs_add,  # TODO: Not started
+    fileSystemCommandList[7]: fs_add,
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
     fileSystemCommandList[9]: fs_delete,
     fileSystemCommandList[10]: fs_dd,
