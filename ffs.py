@@ -6,6 +6,7 @@
 
 # Resources:
 # Assignment 1 code.
+# StackOverflow
 
 import shlex
 import os
@@ -113,11 +114,11 @@ class FSDirectory:
         return self.files
 
     def remove_all_children(self):
-        for c in self.children:
+        for c in self.children[:]:
             c.delete()
 
     def remove_all_files(self):
-        for f in self.files:
+        for f in self.files[:]:
             f.delete()
 
     def delete(self):
@@ -156,6 +157,7 @@ class FSFile:
         self.name = name
         self.parent = parent
         self.the_file = open(self.get_full_name(), 'w+')
+        self.the_file.close()
 
     def get_name(self):
         return self.name
@@ -187,7 +189,6 @@ class FSFile:
             self.parent = new_parent
 
     def delete(self):
-        self.the_file.close()
         os.remove(self.get_full_name())
         self.parent.remove_file(self.get_name())
 
