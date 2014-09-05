@@ -54,8 +54,6 @@ class FSDirectory:
             print('Cannot set the parent of root!')
         elif new_parent is None:
             print('Directories cannot have null parents!')
-        elif new_parent is not FSDirectory:
-            print('Directories must have parents of type FSDirectory!')
         else:
             self.parent = new_parent
 
@@ -122,8 +120,8 @@ class FSDirectory:
             f.delete()
 
     def delete(self):
-        self.remove_all_children()
         self.remove_all_files()
+        self.remove_all_children()
         self.parent.remove_child(self.get_name())
 
 
@@ -165,8 +163,8 @@ class FSFile:
             self.parent = new_parent
 
     def delete(self):
-        self.parent.remove_file(self.get_name())
         os.remove(self.get_full_name())
+        self.parent.remove_file(self.get_name())
 
 # Lists the commands that will be executed by this program.
 fileSystemCommandList = ['pwd', 'cd', 'ls', 'rls', 'tree', 'clear', 'create', 'add', 'cat', 'delete', 'dd', 'quit', 'q']
@@ -432,7 +430,7 @@ fileSystemCommands = {
     #fileSystemCommandList[7]: fs_add,  # TODO: Not started
     #fileSystemCommandList[8]: fs_cat,  # TODO: Not started
     fileSystemCommandList[9]: fs_delete,
-    fileSystemCommandList[10]: fs_dd,  # TODO: Incomplete
+    fileSystemCommandList[10]: fs_dd,
     fileSystemCommandList[11]: fs_quit,
     fileSystemCommandList[12]: fs_quit
 }
